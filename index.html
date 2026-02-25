@@ -499,7 +499,7 @@
   #infant-overlay {
     position: fixed;
     inset: 0;
-    background: var(--ink);
+    background: #100810;
     z-index: 1000;
     display: flex;
     flex-direction: column;
@@ -507,6 +507,85 @@
     justify-content: center;
     cursor: pointer;
     transition: opacity 1.3s ease;
+    overflow: hidden;
+  }
+  /* Vignette — darkness presses in from all edges */
+  #infant-overlay::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 46%,
+      transparent 10%,
+      rgba(12,6,14,0.5) 52%,
+      rgba(8,4,10,0.93) 100%);
+    pointer-events: none;
+    z-index: 3;
+  }
+  /* Light blobs — what a newborn actually sees */
+  #infant-visual {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+  }
+  /* The face — the central warm blob */
+  #blob-face {
+    position: absolute;
+    left: 50%; top: 47%;
+    width: 58vmin; height: 70vmin;
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0.35);
+    filter: blur(48px);
+    background: radial-gradient(ellipse, rgba(235,210,160,0.9) 0%, rgba(200,165,100,0.5) 45%, transparent 72%);
+    opacity: 0.04;
+    transition: opacity 2s ease, transform 2.4s ease, background 2s ease, filter 1.8s ease;
+  }
+  /* Ambient peripheral light — like a window or lamp somewhere in the room */
+  #blob-amb1 {
+    position: absolute;
+    right: 5%; top: 8%;
+    width: 38vmin; height: 38vmin;
+    border-radius: 50%;
+    filter: blur(58px);
+    background: radial-gradient(ellipse, rgba(218,195,148,0.55) 0%, transparent 70%);
+    opacity: 0.11;
+    animation: blobDrift1 16s ease-in-out infinite;
+  }
+  #blob-amb2 {
+    position: absolute;
+    left: 3%; bottom: 10%;
+    width: 48vmin; height: 36vmin;
+    border-radius: 50%;
+    filter: blur(68px);
+    background: radial-gradient(ellipse, rgba(175,162,205,0.38) 0%, transparent 70%);
+    opacity: 0.07;
+    animation: blobDrift2 21s ease-in-out infinite;
+  }
+  /* A third faint blob — the indistinct world beyond */
+  #blob-amb3 {
+    position: absolute;
+    left: 55%; bottom: 5%;
+    width: 30vmin; height: 28vmin;
+    border-radius: 50%;
+    filter: blur(72px);
+    background: radial-gradient(ellipse, rgba(195,178,140,0.3) 0%, transparent 70%);
+    opacity: 0.06;
+    animation: blobDrift3 25s ease-in-out infinite;
+  }
+  @keyframes blobDrift1 {
+    0%,100% { transform: translate(0,0) scale(1); }
+    38%  { transform: translate(-5%,7%) scale(1.07); }
+    72%  { transform: translate(4%,-3%) scale(0.93); }
+  }
+  @keyframes blobDrift2 {
+    0%,100% { transform: translate(0,0) scale(1); }
+    30%  { transform: translate(7%,-5%) scale(1.05); }
+    68%  { transform: translate(-4%,6%) scale(0.96); }
+  }
+  @keyframes blobDrift3 {
+    0%,100% { transform: translate(0,0) scale(1); }
+    45%  { transform: translate(-6%,-4%) scale(1.09); }
+    80%  { transform: translate(5%,3%) scale(0.94); }
   }
   #infant-word {
     font-family: 'IM Fell English', serif;
@@ -517,19 +596,29 @@
     pointer-events: none;
     user-select: none;
     line-height: 1;
+    position: relative;
+    z-index: 5;
   }
   #infant-skip {
     position: absolute;
-    bottom: 28px;
+    bottom: 32px;
     font-family: 'Cormorant Garamond', serif;
-    font-size: 0.72rem;
-    letter-spacing: 0.32em;
-    text-transform: uppercase;
-    color: rgba(240,232,216,0.18);
+    font-size: 0.9rem;
+    letter-spacing: 0.22em;
+    color: rgba(240,232,216,0.72);
     pointer-events: none;
     user-select: none;
     opacity: 0;
+    z-index: 5;
     animation: fadeUp 1s ease 4s forwards;
+    text-shadow: 0 0 18px rgba(240,232,216,0.25);
+  }
+  @keyframes skipPulse {
+    0%, 100% { opacity: 0.72; }
+    50%       { opacity: 0.38; }
+  }
+  #infant-skip.visible {
+    animation: skipPulse 3.2s ease-in-out infinite;
   }
 
   @media(max-width:520px){
@@ -666,6 +755,132 @@
   .scene-box[data-era="late"]    { border-color: rgba(140,120,80,0.32); background: rgba(16,12,10,0.80); }
   .scene-box[data-era="late"]::before    { content: '∞'; }
   .scene-box[data-era="late"]::after     { content: '∞'; }
+
+  /* ── SAVE / RESUME ── */
+  .resume-btn {
+    background: rgba(201,160,51,0.07);
+    border: 1px solid rgba(201,160,51,0.55);
+    color: rgba(201,160,51,0.8);
+    font-family: 'IM Fell English', serif;
+    font-size: 1.05rem;
+    letter-spacing: 0.18em;
+    padding: 12px 40px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .resume-btn:hover { background: rgba(201,160,51,0.12); color: var(--gold); }
+  .fresh-link {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.9rem;
+    color: rgba(201,160,51,0.45);
+    font-style: italic;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    background: none;
+    border: none;
+    padding: 0;
+  }
+  .fresh-link:hover { color: var(--gold); }
+
+  /* ── ANALYST'S NOTEBOOK ── */
+  #notebook-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    background: rgba(10,5,12,0.97);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+    padding: 40px 20px 80px;
+  }
+  .notebook-inner {
+    width: min(640px, 96vw);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .notebook-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(201,160,51,0.25);
+    padding-bottom: 14px;
+  }
+  .notebook-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: var(--gold);
+  }
+  .notebook-close {
+    background: none;
+    border: 1px solid rgba(201,160,51,0.4);
+    color: var(--aged);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    letter-spacing: 0.15em;
+    padding: 6px 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .notebook-close:hover { color: var(--gold); border-color: var(--gold); }
+  .notebook-era-heading {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-top: 8px;
+    margin-bottom: 6px;
+  }
+  .notebook-entry {
+    border-left: 2px solid rgba(139,26,46,0.6);
+    padding: 10px 14px;
+    background: rgba(139,26,46,0.05);
+    margin-bottom: 8px;
+  }
+  .notebook-entry summary {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.9rem;
+    color: var(--gold);
+    cursor: pointer;
+    letter-spacing: 0.06em;
+  }
+  .notebook-entry .nb-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: var(--parchment);
+    font-weight: 300;
+    margin-top: 8px;
+  }
+  .notebook-btn {
+    background: none;
+    border: 1px solid rgba(201,160,51,0.4);
+    color: rgba(201,160,51,0.8);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.14em;
+    padding: 5px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .notebook-btn:hover { color: var(--gold); border-color: var(--gold); }
+  .notebook-empty {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    color: rgba(200,175,130,0.5);
+    font-style: italic;
+    text-align: center;
+    padding: 24px 0;
+  }
+
+  /* ── WHAT IF? REPLAY ── */
+  .what-if-row { cursor: pointer; transition: color 0.2s, border-color 0.2s; }
+  .what-if-row:hover { color: var(--gold); border-color: rgba(201,160,51,0.4); }
+  .what-if-row::after { content: ' ↩'; color: rgba(201,160,51,0.4); font-style: normal; }
+  .what-if-row:hover::after { color: var(--gold); }
 </style>
 </head>
 <body>
@@ -677,6 +892,7 @@
     <span class="game-title">The Inner Theatre</span>
     <span class="stage-indicator" id="stage-indicator">–</span>
     <button class="mute-btn" id="mute-btn" onclick="toggleMute()" title="Toggle music">♫</button>
+    <button class="notebook-btn hidden" id="notebook-btn" onclick="toggleNotebook()">✦ Notebook</button>
   </div>
 
   <!-- BACKGROUND MUSIC -->
@@ -698,6 +914,8 @@
     </p>
     <div style="color:var(--gold);opacity:0.3;font-size:0.9rem">— — —</div>
     <button class="start-btn" onclick="showEnvSelect()">Enter the Theatre</button>
+    <button class="resume-btn hidden" id="resume-btn" onclick="resumeGame()">Continue Your Journey</button>
+    <button class="fresh-link hidden" id="fresh-link" onclick="startFresh()">— start fresh —</button>
   </div>
 
   <div id="env-screen" class="hidden">
@@ -742,6 +960,19 @@
 
 </div>
 
+<!-- ANALYST'S NOTEBOOK OVERLAY -->
+<div id="notebook-overlay" class="hidden">
+  <div class="notebook-inner">
+    <div class="notebook-header">
+      <div class="notebook-title">The Analyst's Notebook</div>
+      <button class="notebook-close" onclick="toggleNotebook()">Close ✕</button>
+    </div>
+    <div id="notebook-entries">
+      <div class="notebook-empty">No insights collected yet. Play through some stages.</div>
+    </div>
+  </div>
+</div>
+
 <script>
 // ═══════════════════════════════════════════════════════════
 // GAME STATE
@@ -753,6 +984,8 @@ let traits = {};          // trait_key → count
 let choiceHistory = {};   // stageId → chosen tag
 let stageList = [];       // built after env selection
 let grooveAwakeningShown = false; // one-time interstitial before groove activates
+let notebook = [];     // collected insights (Feature: Analyst's Notebook)
+let snapshots = {};    // pre-choice state snapshots (Feature: What If? Replay)
 
 // ── FEATURE 2: MOOD GRADIENT MAP ──────────────────────────
 const MOOD_GRADIENTS = {
@@ -1874,16 +2107,65 @@ function showInfantIntro(onComplete) {
   const overlay = document.createElement('div');
   overlay.id = 'infant-overlay';
 
+  // Light blobs — rudimentary infant vision
+  const visual = document.createElement('div');
+  visual.id = 'infant-visual';
+  const blobFace = document.createElement('div'); blobFace.id = 'blob-face';
+  const blobAmb1 = document.createElement('div'); blobAmb1.id = 'blob-amb1';
+  const blobAmb2 = document.createElement('div'); blobAmb2.id = 'blob-amb2';
+  const blobAmb3 = document.createElement('div'); blobAmb3.id = 'blob-amb3';
+  visual.append(blobFace, blobAmb1, blobAmb2, blobAmb3);
+
   const wordEl = document.createElement('div');
   wordEl.id = 'infant-word';
 
   const skipEl = document.createElement('div');
   skipEl.id = 'infant-skip';
-  skipEl.textContent = 'tap to skip';
+  skipEl.textContent = 'tap to face the world';
 
-  overlay.appendChild(wordEl);
-  overlay.appendChild(skipEl);
+  overlay.append(visual, wordEl, skipEl);
   document.body.appendChild(overlay);
+
+  // Update the face blob based on what word is showing
+  function setVisual(word) {
+    const f = blobFace;
+    if (!word || word === 'dark') {
+      f.style.opacity = '0.04';
+      f.style.transform = 'translate(-50%,-50%) scale(0.35)';
+      f.style.background = 'radial-gradient(ellipse, rgba(200,185,155,0.6) 0%, transparent 70%)';
+      f.style.filter = 'blur(60px)';
+    } else if (word === 'soft' || word === 'close') {
+      f.style.opacity = '0.28';
+      f.style.transform = 'translate(-50%,-50%) scale(0.7)';
+      f.style.background = 'radial-gradient(ellipse, rgba(238,215,168,0.8) 0%, rgba(210,178,115,0.4) 45%, transparent 72%)';
+      f.style.filter = 'blur(50px)';
+    } else if (word === 'there') {
+      f.style.opacity = '0.52';
+      f.style.transform = 'translate(-50%,-50%) scale(0.88)';
+      f.style.background = 'radial-gradient(ellipse, rgba(248,230,190,0.9) 0%, rgba(220,190,128,0.5) 45%, transparent 72%)';
+      f.style.filter = 'blur(46px)';
+    } else if (word === 'warm' || word === 'back' || word === 'close') {
+      f.style.opacity = '0.78';
+      f.style.transform = 'translate(-50%,-50%) scale(1.0)';
+      f.style.background = 'radial-gradient(ellipse, rgba(255,242,208,0.98) 0%, rgba(235,200,138,0.65) 40%, transparent 70%)';
+      f.style.filter = 'blur(42px)';
+    } else if (word === 'gone') {
+      f.style.opacity = '0.03';
+      f.style.transform = 'translate(-50%,-62%) scale(0.3)';
+      f.style.background = 'radial-gradient(ellipse, rgba(160,152,185,0.4) 0%, transparent 70%)';
+      f.style.filter = 'blur(68px)';
+    } else if (word === 'cry') {
+      f.style.opacity = '0.38';
+      f.style.transform = 'translate(-50%,-50%) scale(0.72)';
+      f.style.background = 'radial-gradient(ellipse, rgba(235,148,88,0.85) 0%, rgba(198,95,55,0.45) 42%, transparent 70%)';
+      f.style.filter = 'blur(48px)';
+    } else if (word === 'again') {
+      f.style.opacity = '0.22';
+      f.style.transform = 'translate(-50%,-50%) scale(0.75)';
+      f.style.background = 'radial-gradient(ellipse, rgba(230,210,168,0.75) 0%, transparent 70%)';
+      f.style.filter = 'blur(52px)';
+    }
+  }
 
   let done = false;
   let activeTimeout = null;
@@ -1915,9 +2197,11 @@ function showInfantIntro(onComplete) {
     const fo  = item.fo  || 600;
     const dur = item.dur || 1000;
 
-    wordEl.textContent  = item.w;
+    wordEl.textContent    = item.w;
     wordEl.style.fontSize = item.sz || '2rem';
     wordEl.style.color    = item.c  || 'var(--parchment)';
+
+    setVisual(item.w);
 
     // Fade in
     wordEl.style.transition = `opacity ${fi}ms ease`;
@@ -1934,7 +2218,10 @@ function showInfantIntro(onComplete) {
     }, fi + dur);
   }
 
-  // Brief moment of pure dark before first word
+  // Start in pure dark, then begin
+  setVisual('');
+  // After fade-in completes, switch to pulsing animation so it catches the eye
+  setTimeout(() => { if (!done) skipEl.classList.add('visible'); }, 5100);
   activeTimeout = setTimeout(next, 700);
 }
 
@@ -1945,6 +2232,8 @@ function selectEnv(envKey) {
   document.getElementById('game-header').classList.remove('hidden');
   document.getElementById('trait-panel').classList.remove('hidden');
   document.getElementById('game-scene').classList.remove('hidden');
+  document.getElementById('notebook-btn').classList.remove('hidden');
+  saveGame();
   window.scrollTo({ top: 0 });
   showInfantIntro(() => renderStage(0));
 }
@@ -2241,6 +2530,13 @@ function renderStage(idx) {
   const insight  = stage.insight ? (typeof stage.insight === 'function' ? stage.insight(env, traits) : stage.insight) : null;
   const echo     = stage.echo ? stage.echo(traits) : null;
 
+  // Analyst's Notebook: collect insight if not already saved (deduplicate by text)
+  const stageGroup = typeof stage.stageGroup === 'function' ? stage.stageGroup(env) : stage.stageGroup;
+  if (insight && !notebook.find(n => n.text === insight.text)) {
+    notebook.push({ stageGroup, ageLabel, label: ageLabel || insight.label, text: insight.text });
+    updateNotebookBtn();
+  }
+
   // Count how many choice-stages have been completed
   const grooveDepth = Object.keys(choiceHistory).length;
 
@@ -2339,8 +2635,7 @@ function renderStage(idx) {
   void box.offsetWidth;
   box.className = 'scene-box fade-enter';
 
-  // Feature 7: Apply life stage era theme
-  const stageGroup = typeof stage.stageGroup === 'function' ? stage.stageGroup(env) : stage.stageGroup;
+  // Feature 7: Apply life stage era theme (stageGroup already resolved above)
   const era = STAGE_ERA_MAP[stageGroup] || 'adult';
   box.setAttribute('data-era', era);
 
@@ -2355,8 +2650,16 @@ function makeChoice(choiceIdx) {
   const stage = stageList[stageIndex];
   const choice = stage.choices[choiceIdx];
 
+  // Snapshot state before this choice (for What If? Replay)
+  snapshots[stage.id] = {
+    traits: Object.assign({}, traits),
+    choiceHistory: Object.assign({}, choiceHistory),
+    stageIndex: stageIndex
+  };
+
   addTrait(choice.tag);
   choiceHistory[stage.id] = choice.tag;
+  saveGame();
 
   // After choice: clear any live scramble effects, then dim unchosen buttons
   clearAllScrambles();
@@ -2482,11 +2785,13 @@ function advanceStage() {
   // One-time interstitial the first time the groove becomes active
   if (!grooveAwakeningShown && Object.keys(choiceHistory).length >= 2) {
     grooveAwakeningShown = true;
+    saveGame();
     showGrooveAwakening(next);
     return;
   }
 
   renderStage(next);
+  saveGame();
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -2784,10 +3089,13 @@ function showFinalResolution() {
 
   const profile = profiles[dominant] || profiles.reflect;
 
-  // Build pattern ledger
+  // Clear save — game complete
+  clearSave();
+
+  // Build pattern ledger (with What If? replay hooks)
   const ledgerRows = Object.entries(choiceHistory).map(([stageId, tag]) => {
     const stageName = stageId.replace(/_/g,' ');
-    return `<div class="pattern-row"><em>${stageName}:</em> ${TRAIT_NAMES[tag]||tag}</div>`;
+    return `<div class="pattern-row what-if-row" onclick="whatIfReplay('${stageId}')"><em>${stageName}:</em> ${TRAIT_NAMES[tag]||tag}</div>`;
   }).join('');
 
   // Environment summary
@@ -2808,6 +3116,7 @@ function showFinalResolution() {
 
     <div class="pattern-ledger">
       <div class="pattern-ledger-title">The Pattern Through the Years</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:0.82rem;color:rgba(201,160,51,0.5);font-style:italic;margin-bottom:10px;">Click any moment to branch from there</div>
       ${ledgerRows}
     </div>
 
@@ -2823,8 +3132,130 @@ function showFinalResolution() {
     <button class="continue-btn" style="align-self:center;margin-top:8px" onclick="location.reload()">Begin Again ↺</button>
   `;
   box.className = 'scene-box fade-enter';
+
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+// ═══════════════════════════════════════════════════════════
+// FEATURE: SAVE / RESUME
+// ═══════════════════════════════════════════════════════════
+
+function saveGame() {
+  localStorage.setItem('inner_theatre_save', JSON.stringify({
+    env, stageIndex, traits, choiceHistory, grooveAwakeningShown
+  }));
+}
+
+function clearSave() {
+  localStorage.removeItem('inner_theatre_save');
+}
+
+function resumeGame() {
+  const raw = localStorage.getItem('inner_theatre_save');
+  if (!raw) return;
+  const save = JSON.parse(raw);
+  env = save.env;
+  stageIndex = save.stageIndex;
+  traits = save.traits || {};
+  choiceHistory = save.choiceHistory || {};
+  grooveAwakeningShown = save.grooveAwakeningShown || false;
+
+  stageList = buildStages();
+  document.getElementById('title-screen').classList.add('hidden');
+  document.getElementById('game-header').classList.remove('hidden');
+  document.getElementById('trait-panel').classList.remove('hidden');
+  document.getElementById('game-scene').classList.remove('hidden');
+  document.getElementById('notebook-btn').classList.remove('hidden');
+  renderTraits();
+  renderStage(stageIndex);
+  startMusic();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function startFresh() {
+  clearSave();
+  document.getElementById('resume-btn').classList.add('hidden');
+  document.getElementById('fresh-link').classList.add('hidden');
+  showEnvSelect();
+}
+
+// ═══════════════════════════════════════════════════════════
+// FEATURE: ANALYST'S NOTEBOOK
+// ═══════════════════════════════════════════════════════════
+
+function toggleNotebook() {
+  document.getElementById('notebook-overlay').classList.toggle('hidden');
+  if (!document.getElementById('notebook-overlay').classList.contains('hidden')) {
+    renderNotebook();
+  }
+}
+
+function updateNotebookBtn() {
+  const btn = document.getElementById('notebook-btn');
+  if (!btn) return;
+  btn.textContent = `✦ Notebook (${notebook.length})`;
+}
+
+function renderNotebook() {
+  const container = document.getElementById('notebook-entries');
+  if (!notebook.length) {
+    container.innerHTML = '<div class="notebook-empty">No insights collected yet. Play through some stages.</div>';
+    return;
+  }
+
+  // Group by stageGroup (era)
+  const groups = {};
+  notebook.forEach(n => {
+    const g = n.stageGroup || 'General';
+    if (!groups[g]) groups[g] = [];
+    groups[g].push(n);
+  });
+
+  let html = '';
+  Object.entries(groups).forEach(([era, entries]) => {
+    html += `<div class="notebook-era-heading">${era}</div>`;
+    entries.forEach(e => {
+      html += `
+        <details class="notebook-entry">
+          <summary>${e.label}</summary>
+          <div class="nb-text">${e.text}</div>
+        </details>`;
+    });
+  });
+  container.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════
+// FEATURE: WHAT IF? REPLAY
+// ═══════════════════════════════════════════════════════════
+
+function whatIfReplay(stageId) {
+  const snap = snapshots[stageId];
+  if (!snap) return;
+
+  traits = Object.assign({}, snap.traits);
+  choiceHistory = Object.assign({}, snap.choiceHistory);
+  stageIndex = snap.stageIndex;
+  grooveAwakeningShown = true; // don't re-show interstitial mid-replay
+
+  document.getElementById('game-scene').classList.remove('hidden');
+  document.getElementById('game-header').classList.remove('hidden');
+  document.getElementById('trait-panel').classList.remove('hidden');
+  renderTraits();
+  renderStage(snap.stageIndex);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ═══════════════════════════════════════════════════════════
+// PAGE LOAD: CHECK FOR SAVED GAME
+// ═══════════════════════════════════════════════════════════
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (localStorage.getItem('inner_theatre_save')) {
+    document.getElementById('resume-btn').classList.remove('hidden');
+    document.getElementById('fresh-link').classList.remove('hidden');
+  }
+});
 </script>
 </body>
 </html>
